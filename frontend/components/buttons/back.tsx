@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function BackHome() {
   return (
-    <Link href="/" className="underline text-blue-700 fixed p-4">
+    <Link href="/" className="underline text-black fixed p-4">
       <img
         width="30"
         height="30"

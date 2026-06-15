@@ -24,6 +24,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
 interface Contribuicao {
   IdContribuicaoAlimenticia?: number;
@@ -73,15 +74,15 @@ export function TeamsRankingChart() {
       try {
         setLoading(true);
         setError(null);
-
-        const res = await fetch(`${backend_url}/api/contributions`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-
-        if (!res.ok) throw new Error("Erro ao buscar contribuições");
-
-        const contribRaw = await res.json();
+        const contribRaw = isMockMode()
+          ? getMockContributions()
+          : await fetch(`${backend_url}/api/contributions`, {
+              cache: "no-store",
+              signal: controller.signal,
+            }).then((res) => {
+              if (!res.ok) throw new Error("Erro ao buscar contribuições");
+              return res.json();
+            });
         if (!active) return;
 
         const contribPorTime = new Map<number, Contribuicao[]>();

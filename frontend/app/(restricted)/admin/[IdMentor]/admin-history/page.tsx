@@ -1,12 +1,12 @@
 "use client";
 
 import React, { SetStateAction } from "react";
-import RecordsMentor from "@/components/records-mentor";
-import SwitchViewButton from "@/components/toggle-button";
-import MenuDesktopAdmin from "@/components/menu-desktop-admin";
-import MenuMobileAdmin from "@/components/menu-mobile-admin";
-import RenderContributionTableAdmin from "@/components/table-contribution-admin";
-import RenderContributionCardAdmin from "@/components/grid-contribution-admin";
+import RecordsMentor from "@/components/administrator/records-mentor";
+import SwitchViewButton from "@/components/buttons/toggle";
+import MenuDesktopAdmin from "@/components/administrator/menu";
+import MenuMobileAdmin from "@/components/administrator/menu-mobile";
+import RenderContributionTableAdmin from "@/components/administrator/contributions-table";
+import RenderContributionCardAdmin from "@/components/administrator/contributions-grid";
 
 {
   /** 
@@ -27,7 +27,7 @@ export default function AdminPageVision() {
   return (
     <div className="min-h-dvh w-full overflow-y-hidden overflow-x-hidden flex flex-col bg-[#f4f3f1]/60">
       <div className="flex flex-col left-0 top-0">
-        <header className="py-4 mt-6 relative flex justify-center items-center">
+        <header className="py-4 mt-6 relative flex justify-center items-center max-w-100 mx-auto">
           <button
             type="button"
             className={`open-menu hover:text-primary/60 ${
@@ -38,26 +38,15 @@ export default function AdminPageVision() {
             {" "}
             ☰{" "}
           </button>
-          <h1
-            className={`text-4xl font-semibold text-[#cc3983] text-center transition-all duration-300 ease-in-out ${
-              menuOpen ? "md:pl-[270px]" : "ml-0"
-            }`}
-          >
-            Histórico de contribuições
-          </h1>
         </header>
       </div>
 
-      <div
-        className={`w-full flex justify-center pt-4 transition-all duration-300 ease-in-out ${
-          menuOpen ? "md:pl-[270px]" : "ml-0"
-        }`}
-      >
+      <div className="w-full flex justify-center pt-4 transition-all duration-300 ease-in-out">
         <MenuDesktopAdmin menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
         <MenuMobileAdmin />
 
-        <main className="w-full max-w-[1300px] p-1.5 md:mt-0 ">
+        <main className="w-full max-w-[1300px] p-4 md:mt-0">
           {selectedContribution && (
             <RecordsMentor
               data={selectedContribution}
@@ -65,7 +54,7 @@ export default function AdminPageVision() {
               setIsOpen={setIsOpen}
             />
           )}
-          <div className="flex flex-col gap-2 mx-3 text-center">
+          <div className="flex flex-col gap-2 text-center">
             <h3 className="text-2xl uppercase font-semibold text-primary ">
               Histórico de contribuições de todos os grupos
             </h3>

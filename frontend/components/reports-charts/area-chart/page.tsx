@@ -17,8 +17,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Contribution } from "@/components/contribution-table-admin/columns";
+import { Contribution } from "@/components/administrator/contributions-table/columns";
 import { v4 as uuidv4 } from "uuid";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
 export const description =
   "Gráfico de arrecadações financeiras ao longo do tempo";
@@ -43,14 +44,15 @@ export function FinanContribuitionsChart() {
       try {
         setLoading(true);
         setError(null);
-
-        const res = await fetch(`${backend_url}/api/contributions`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!res.ok) throw new Error("Erro ao buscar contribuições");
-
-        const raw = await res.json();
+        const raw = isMockMode()
+          ? getMockContributions()
+          : await fetch(`${backend_url}/api/contributions`, {
+              cache: "no-store",
+              signal: controller.signal,
+            }).then((res) => {
+              if (!res.ok) throw new Error("Erro ao buscar contribuições");
+              return res.json();
+            });
 
         const data: Contribution[] = Array.isArray(raw)
           ? raw.map((r: any) => ({
@@ -63,7 +65,7 @@ export function FinanContribuitionsChart() {
               Quantidade:
                 r.Quantidade != null
                   ? Number(
-                      String(r.Quantidade).replace(/\./g, "").replace(",", ".")
+                      String(r.Quantidade).replace(/\./g, "").replace(",", "."),
                     )
                   : 0,
               DataContribuicao: String(r.DataContribuicao ?? ""),
@@ -91,20 +93,23 @@ export function FinanContribuitionsChart() {
   const chartData =
     contributions.length > 0
       ? Object.values(
-          contributions.reduce((acc: any, c: Contribution) => {
-            if (c.TipoDoacao !== "Financeira") return acc;
-            const date = new Date(c.DataContribuicao);
-            if (isNaN(date.getTime())) return acc;
+          contributions.reduce(
+            (acc: any, c: Contribution) => {
+              if (c.TipoDoacao !== "Financeira") return acc;
+              const date = new Date(c.DataContribuicao);
+              if (isNaN(date.getTime())) return acc;
 
-            const month = date.toLocaleString("pt-BR", {
-              month: "short",
-              year: "numeric",
-            });
+              const month = date.toLocaleString("pt-BR", {
+                month: "short",
+                year: "numeric",
+              });
 
-            if (!acc[month]) acc[month] = { month, desktop: 0 };
-            acc[month].desktop += c.Quantidade;
-            return acc;
-          }, {} as Record<string, { month: string; desktop: number }>)
+              if (!acc[month]) acc[month] = { month, desktop: 0 };
+              acc[month].desktop += c.Quantidade;
+              return acc;
+            },
+            {} as Record<string, { month: string; desktop: number }>,
+          ),
         )
       : [];
 

@@ -2,7 +2,7 @@ import { prisma } from "../../prisma/lib/prisma.js";
 import { v4 as uuidv4 } from "uuid";
 
 const contributionController = {
-  //GET /api/contributions
+  // GET /api/contributions
   allContributions: async (_, res) => {
     try {
       const financeContribs = await prisma.contribuicao_Financeira.findMany({
@@ -67,7 +67,7 @@ const contributionController = {
                 Imagem: contrib.comprovante.Imagem,
               }
             : null,
-          alimentos: [], // Financeira não tem alimentos
+          alimentos: [],
           PesoUnidade: 0,
           uuid: contrib.uuid,
           NomeTime:
@@ -105,7 +105,7 @@ const contributionController = {
       ];
 
       allContribs.sort(
-        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao)
+        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao),
       );
 
       res.json(allContribs);
@@ -117,7 +117,7 @@ const contributionController = {
     }
   },
 
-  //GET /api/contributions/:RaUsuario
+  // GET /api/contributions/:RaUsuario
   getContributionsByRa: async (req, res) => {
     try {
       const { RaUsuario } = req.params;
@@ -202,7 +202,7 @@ const contributionController = {
       }
 
       allContribs.sort(
-        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao)
+        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao),
       );
       res.json(allContribs);
     } catch (err) {
@@ -214,7 +214,7 @@ const contributionController = {
     }
   },
 
-  //GET /api/contributions/edition/:editionNumber
+  // GET /api/contributions/edition/:editionNumber
   getContributionsByEdition: async (req, res) => {
     try {
       const { editionNumber } = req.params;
@@ -230,7 +230,7 @@ const contributionController = {
         31,
         23,
         59,
-        59
+        59,
       );
 
       const financeContribs = await prisma.contribuicao_Financeira.findMany({
@@ -266,7 +266,7 @@ const contributionController = {
       }
 
       allContribs.sort(
-        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao)
+        (a, b) => new Date(b.DataContribuicao) - new Date(a.DataContribuicao),
       );
 
       res.json(allContribs);
@@ -279,7 +279,7 @@ const contributionController = {
     }
   },
 
-  //POST /api/createContribution
+  // POST /api/createContribution
   createContribution: async (req, res) => {
     const {
       RaUsuario,
@@ -432,7 +432,7 @@ const contributionController = {
     }
   },
 
-  //DELETE /api/:TipoDoacao/:IdContribuicao
+  // DELETE /api/:TipoDoacao/:IdContribuicao
   deleteContribution: async (req, res) => {
     const { TipoDoacao, IdContribuicao } = req.params;
 

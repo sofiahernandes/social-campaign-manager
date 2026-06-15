@@ -28,7 +28,7 @@ export default function AllDonations({
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({} as any));
+        const err = await res.json().catch(() => ({}) as any);
         alert(err?.error || "Erro ao cadastrar contribuição");
         return;
       }

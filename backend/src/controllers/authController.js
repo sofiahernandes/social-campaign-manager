@@ -11,7 +11,7 @@ const sanitizeUser = (u) => ({
   TelefoneUsuario: u.TelefoneUsuario,
 });
 const authController = {
-  //POST /api/register
+  // POST /api/register
   createUser: async (req, res) => {
     const {
       RaUsuario,
@@ -74,7 +74,7 @@ const authController = {
     }
   },
 
-  //POST /api/register/login
+  // POST /api/register/login
   loginUser: async (req, res) => {
     const { RaUsuario, SenhaUsuario } = req.body;
 
@@ -93,7 +93,7 @@ const authController = {
 
       const senhaValida = await bcrypt.compare(
         SenhaUsuario,
-        usuario.SenhaUsuario
+        usuario.SenhaUsuario,
       );
 
       if (!senhaValida) {
@@ -111,8 +111,7 @@ const authController = {
     }
   },
 
-  // Reset de senha
-  //PUT /api/resetPassword
+  // PUT /api/resetPassword
   resetPassword: async (req, res) => {
     const { rausuario, newPassword } = req.body;
     if (!rausuario || !newPassword) {
@@ -133,7 +132,7 @@ const authController = {
     }
   },
 
-  //POST /api/logOutUser
+  // POST /api/logOutUser
   logOutUser: async (req, res) => {
     try {
       const { jti } = req.usuario;
@@ -146,4 +145,5 @@ const authController = {
     }
   },
 };
+
 export default authController;

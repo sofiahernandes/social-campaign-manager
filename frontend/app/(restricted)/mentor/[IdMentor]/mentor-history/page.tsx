@@ -1,12 +1,13 @@
 "use client";
 
 import React, { SetStateAction, useEffect, useState } from "react";
-import BackHome from "@/components/back-home";
+import BackHome from "@/components/buttons/back";
 import { useParams } from "next/navigation";
-import RecordsMentor from "@/components/records-mentor";
+import RecordsMentor from "@/components/administrator/records-mentor";
 import RenderContributionCard from "@/components/grid-contribution";
-import SwitchViewButton from "@/components/toggle-button";
-import RenderContributionTable from "@/components/table-contribution";
+import SwitchViewButton from "@/components/buttons/toggle";
+import RenderContributionTable from "@/components/contributions-table";
+import { getMockUser, getMockMentorTeam, isMockMode } from "@/lib/mock-db";
 
 interface TeamData {
   IdTime: number;
@@ -41,6 +42,14 @@ export default function MentorVision() {
       try {
         setLoadingTeam(true);
         setErrorTeam(null);
+        if (isMockMode()) {
+          const mock =
+            getMockMentorTeam(2024001, IdMentor ?? 0) ||
+            getMockMentorTeam(2024002, IdMentor ?? 0);
+          if (!active) return;
+          setTeam(mock?.team ?? null);
+          return;
+        }
 
         const res = await fetch(`${backend_url}/api/mentor/${IdMentor}/team`, {
           cache: "no-store",
@@ -53,7 +62,7 @@ export default function MentorVision() {
         }
         const mentorData = await res.json();
         const oneTeam: TeamData | null = Array.isArray(mentorData)
-          ? mentorData[0] ?? null
+          ? (mentorData[0] ?? null)
           : (mentorData as TeamData | null);
 
         if (!active) return;
@@ -90,8 +99,12 @@ export default function MentorVision() {
       try {
         setLoadingUser(true);
         setErrorUser(null);
+        if (isMockMode()) {
+          setUser(getMockUser(ra ?? 0));
+          return;
+        }
 
-        const res = await fetch(`${backend_url}/api/user/${raUsuario}`, {
+        const res = await fetch(`${backend_url}/api/user/${ra}`, {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -127,15 +140,10 @@ export default function MentorVision() {
         <div className="absolute left-0 top-0">
           <BackHome />
         </div>
-        <header className="py-4 mt-6 relative flex justify-center items-center">
-          <h1 className="text-4xl font-semibold text-[#cc3983] text-center">
-            Histórico de contribuições
-          </h1>
-        </header>
       </div>
 
-      <div className="w-full flex justify-center pt-4 transition-all duration-300 ease-in-out">
-        <main className="w-full self-center max-w-[1300px] p-1.5 md:mt-0">
+      <div className="w-full flex justify-center transition-all duration-300 ease-in-out">
+        <main className="w-full self-center max-w-[1300px] p-4 md:mt-0">
           {selectedContribution && (
             <RecordsMentor
               data={selectedContribution}
@@ -143,7 +151,7 @@ export default function MentorVision() {
               setIsOpen={setIsOpen}
             />
           )}
-          <div className="flex flex-col gap-2 mx-3 text-center">
+          <div className="flex flex-col gap-2 text-center">
             <h3 className="text-2xl uppercase font-semibold text-primary">
               {loadingTeam
                 ? "Carregando time…"

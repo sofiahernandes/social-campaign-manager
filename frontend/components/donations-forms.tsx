@@ -47,7 +47,6 @@ export default function DonationsForm({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  // Estados locais para os inputs
   const [metaInput, setMetaInput] = useState<string>("");
   const [gastosInput, setGastosInput] = useState<string>("");
   const [quantidadeInput, setQuantidadeInput] = useState<string>("");
@@ -55,14 +54,12 @@ export default function DonationsForm({
   const normalize = (s: string) => s.replace(",", ".").trim();
   const toNumberOrNaN = (s: string) => Number(normalize(s));
 
-  // Sincroniza valores numéricos com inputs de texto
   useEffect(() => {
     setMetaInput(meta ? String(meta) : "");
     setGastosInput(gastos ? String(gastos) : "");
     setQuantidadeInput(quantidade ? String(quantidade) : "");
   }, [meta, gastos, quantidade]);
 
-  // Animação de botão
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Clipboard, Eye } from "lucide-react";
-import formatBRL from "../formatBRL";
+import formatBRL from "@/hooks/use-format-currency";
 
 export type Contribution = {
   IdContribuicao: number;
@@ -31,8 +31,8 @@ export type Contribution = {
   PontuacaoAlimento?: number;
   NomeTime: string;
   PesoUnidade: number;
-  PesoTotal?: number,
-  PontuacaoTotal?: number,
+  PesoTotal?: number;
+  PontuacaoTotal?: number;
   uuid: string;
 };
 
@@ -42,8 +42,27 @@ export type ContributionActions = {
 };
 
 export const makeContributionColumns = (
-  actions: ContributionActions = {}
+  actions: ContributionActions = {},
 ): ColumnDef<Contribution>[] => [
+  {
+    accessorKey: "NomeTime",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="prettyHeader"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Nome do grupo
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <span className="font-medium w-[220px] block truncate">
+        {row.original.NomeTime ?? "-"}
+      </span>
+    ),
+  },
   {
     accessorKey: "Fonte",
     header: ({ column }) => {
@@ -58,7 +77,7 @@ export const makeContributionColumns = (
       );
     },
     cell: ({ row }) => (
-      <span className="font-medium w-[220px] block truncate">
+      <span className="w-[220px] block truncate">
         {row.original.Fonte ?? "-"}
       </span>
     ),
@@ -161,11 +180,11 @@ export const makeContributionColumns = (
     ),
     cell: ({ row }) => {
       const v = row.original.PontuacaoTotal;
-      return row.original.TipoDoacao === "Alimenticia" && Number.isFinite(v) ?
+      return row.original.TipoDoacao === "Alimenticia" && Number.isFinite(v) ? (
         <span className="w-[60px] block truncate">
-          {new Intl.NumberFormat("pt-BR").format(v!)} 
+          {new Intl.NumberFormat("pt-BR").format(v!)}
         </span>
-       : (
+      ) : (
         <span> - </span>
       );
     },
@@ -210,7 +229,7 @@ export const makeContributionColumns = (
     },
   },
   {
-    accessorKey: "comprovante",
+    id: "comprovante",
     header: "Comprovante",
     cell: ({ row }) => {
       const url = row.original.comprovante?.Imagem;
@@ -250,7 +269,7 @@ export const makeContributionColumns = (
             <DropdownMenuItem
               onClick={async () => {
                 await navigator.clipboard.writeText(
-                  c.IdContribuicao.toString()
+                  c.IdContribuicao.toString(),
                 );
                 actions.onCopied?.(c.IdContribuicao);
               }}

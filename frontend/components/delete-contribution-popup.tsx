@@ -39,7 +39,7 @@ export default function DeleteContribution({
 
       const res = await fetch(
         `${backend_url}/api/contribution/${TipoDoacao}/${IdContribuicao}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (!res.ok) {
@@ -103,7 +103,6 @@ export default function DeleteContribution({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          {/* mudar mensagem de erro depois*/}
           {error && <p className="ml-3 text-sm text-red-600"> {error} </p>}
 
           <AlertDialogFooter>

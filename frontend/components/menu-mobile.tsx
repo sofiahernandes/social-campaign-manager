@@ -44,13 +44,11 @@ export default function MenuMobile() {
     }
   };
 
-  // ---------- Estilos base ----------
   const basePill =
     "relative flex items-center justify-center h-10 w-16 rounded-[10px] transition-all duration-300 ease-out";
   const neutralPill = "bg-transparent hover:bg-primary/20";
   const activePill = "bg-[#3B5D3D] text-white border border-[#3B5D3D]";
 
-  // ---------- Ícones ----------
   const icons = useMemo(
     () => ({
       home: { default: homeDefault, active: homeActive, pressed: homePressed },
@@ -61,10 +59,9 @@ export default function MenuMobile() {
         pressed: historyPressed,
       },
     }),
-    []
+    [],
   );
 
-  // ---------- Efeito "pop" ----------
   const [pressed, setPressed] = useState<{ [key: string]: boolean }>({});
   const timersRef = useRef<{ [key: string]: number }>({});
 
@@ -85,7 +82,7 @@ export default function MenuMobile() {
   const getIconSrc = (
     set: { default: any; active: any; pressed?: any },
     isTabActive: boolean,
-    isPressed: boolean
+    isPressed: boolean,
   ) => {
     if (isPressed && set.pressed) return set.pressed;
     if (isTabActive) return set.active;
@@ -123,9 +120,8 @@ export default function MenuMobile() {
         }
       `}</style>
 
-      <div className="mx-auto w-[300px] px-4 sm:px-6 rounded-2xl">
-        <div className="flex items-center justify-center gap-8 sm:gap-12 py-2 bg-primary rounded-[30px]">
-          {/* Aba 1: Home */}
+      <div className="mx-auto w-xs px-4 sm:px-6 rounded-2xl">
+        <div className="flex items-center justify-center gap-8 sm:gap-12 py-2 mb-6 bg-primary rounded-xl">
           <Link
             href={homeHref}
             aria-label="Início"
@@ -146,7 +142,6 @@ export default function MenuMobile() {
             />
           </Link>
 
-          {/* Aba 2: Cadastrar */}
           <Link
             href={createHref}
             aria-label="Cadastrar"
@@ -168,7 +163,6 @@ export default function MenuMobile() {
             />
           </Link>
 
-          {/* Aba 3: Histórico */}
           <Link
             href={historyHref}
             aria-label="Histórico"
@@ -182,7 +176,7 @@ export default function MenuMobile() {
               src={getIconSrc(
                 icons.history,
                 isActive(historyHref),
-                !!pressed.history
+                !!pressed.history,
               )}
               alt="Histórico"
               width={24}

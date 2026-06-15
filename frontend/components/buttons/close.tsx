@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import React from "react";
 
 interface Props {
@@ -17,7 +18,7 @@ const CloseButton: React.FC<Props> = ({ isActive, onClick, className }) => {
       aria-hidden={!isActive}
       tabIndex={isActive ? 0 : -1}
     >
-      X
+      <X className="h-6 w-6" />
     </button>
   );
 };

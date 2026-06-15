@@ -160,21 +160,22 @@ export default function FoodDonations({
     setComprovante(file);
     e.target.value = "";
 
-    // Para o GIF depois de 1s
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => stopGif(), 1000);
   };
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      <label>Nome do Evento</label>
-      <input
-        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-black"
-        type="text"
-        placeholder="Ex: Instituto Alma"
-        value={fonte}
-        onChange={(e) => setFonte(e.target.value)}
-      />
+      <div>
+        <label>Nome do Evento</label>
+        <input
+          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-black"
+          type="text"
+          placeholder="Ex: Instituto Alma"
+          value={fonte}
+          onChange={(e) => setFonte(e.target.value)}
+        />
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
         <div>
@@ -216,50 +217,53 @@ export default function FoodDonations({
         </div>
       </div>
 
-      <div className="flex gap-4 font-bold mt-2">
-        <div className="w-[40%] text-center">Alimento</div>
-        <div className="w-[25%] text-center">Unidades</div>
-        <div className="w-[25%] text-center">Kg/Unidade</div>
+      <div className="flex flex-col md:flex-row gap-4 mt-2">
+        <div className="md:w-[40%]">
+          <div>Alimento</div>
+          <select
+            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
+            value={idAlimento}
+            onChange={(e) => setIdAlimento(parseInt(e.target.value))}
+          >
+            {ALIMENTOS.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:w-[25%]">
+          <div>Unidades</div>
+          <input
+            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
+            type="number"
+            placeholder="Qtd"
+            value={quantidade === 0 ? "" : quantidade}
+            onChange={(e) => {
+              const v = e.target.value;
+              setQuantidade(v === "" ? 0 : Math.floor(Number(v)));
+            }}
+          />
+        </div>
+
+        <div className="md:w-[25%]">
+          <div>Kg/Unidade</div>
+          <input
+            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
+            type="number"
+            step="1"
+            placeholder="Kg"
+            value={pesoUnidade === 0 ? "" : pesoUnidade}
+            onChange={(e) => {
+              const v = e.target.value;
+              setPesoUnidade(v === "" ? 0 : Math.floor(Number(v)));
+            }}
+          />
+        </div>
       </div>
 
-      <div className="flex gap-4 mt-2">
-        <select
-          className="w-[40%] bg-white border border-gray-300 rounded-lg px-3 py-2"
-          value={idAlimento}
-          onChange={(e) => setIdAlimento(parseInt(e.target.value))}
-        >
-          {ALIMENTOS.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.nome}
-            </option>
-          ))}
-        </select>
-
-        <input
-          className="w-[25%] bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
-          type="number"
-          placeholder="Qtd"
-          value={quantidade === 0 ? "" : quantidade}
-          onChange={(e) => {
-            const v = e.target.value;
-            setQuantidade(v === "" ? 0 : Math.floor(Number(v)));
-          }}
-        />
-
-        <input
-          className="w-[25%] bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
-          type="number"
-          step="1"
-          placeholder="Kg"
-          value={pesoUnidade === 0 ? "" : pesoUnidade}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPesoUnidade(v === "" ? 0 : Math.floor(Number(v)));
-          }}
-        />
-      </div>
-
-      <label className="block mt-9">Imagem dos Alimentos (PNG/JPEG/PDF)</label>
+      <label className="block mt-9">Imagem (Comprovações)</label>
       <input
         ref={fileInputRef}
         type="file"

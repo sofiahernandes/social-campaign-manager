@@ -3,44 +3,42 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CustomInputs from "./login-user-inputs";
-import MentorInputs from "./login-mentor-input";
+import MentorInputs from "./administrator/login-forms";
 import { useRouter } from "next/navigation";
+import {
+  ensureMockAdminForUser,
+  isMockMode,
+  loginMockMentor,
+  loginMockUser,
+} from "@/lib/mock-db";
 
 export default function TabsLogin() {
   const router = useRouter();
-  const [IdMentor, setIdMentor] = React.useState<number>();
-  const [IdTime] = React.useState("");
+  const [_, setIdMentor] = React.useState<number>();
   const [EmailMentor, setEmailMentor] = React.useState("");
   const [SenhaMentor, setSenhaMentor] = React.useState("");
-  const [RaUsuario, setRaUsuario] = React.useState("");
-  const [SenhaUsuario, setSenhaUsuario] = React.useState("");
-
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const [RaUsuario, setRaUsuario] = React.useState("2024001");
+  const [SenhaUsuario, setSenhaUsuario] = React.useState("123@Arkana");
 
   // Login Student
   const handleSubmitAluno = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL não está configurada");
-      alert("Erro de configuração. Entre em contato com o suporte.");
-      return;
-    }
-
-    const apiUrl = `${backendUrl}/api/user/login`;
-
     try {
+      if (isMockMode()) {
+        loginMockUser(parseInt(RaUsuario), SenhaUsuario);
+        router.push(`/user/${RaUsuario}/new-contribution`);
+        return;
+      }
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const apiUrl = `${backendUrl}/api/user/login`;
       const res = await fetch(apiUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           RaUsuario: parseInt(RaUsuario),
           SenhaUsuario,
         }),
       });
-
       if (!res.ok) {
         const err = await res
           .json()
@@ -48,10 +46,8 @@ export default function TabsLogin() {
         alert("Erro: " + (err.error || `Status ${res.status}`));
         return;
       }
-
-      const userId = await res.json();
       router.push(`/user/${RaUsuario}/new-contribution`);
-    } catch (error) {
+    } catch {
       alert("Erro ao logar usuário");
     }
   };
@@ -60,27 +56,19 @@ export default function TabsLogin() {
   const handleSubmitMentor = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL não está configurada");
-      alert("Erro de configuração. Entre em contato com o suporte.");
-      return;
-    }
-
-    const apiUrl = `${backendUrl}/api/loginMentor`;
-
     try {
-      const res = await fetch(apiUrl, {
+      if (isMockMode()) {
+        const mentor = loginMockMentor(EmailMentor, SenhaMentor, false);
+        setIdMentor(mentor.IdMentor);
+        router.push(`/mentor/${mentor.IdMentor}/mentor-history`);
+        return;
+      }
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const res = await fetch(`${backendUrl}/api/loginMentor`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          EmailMentor: EmailMentor,
-          SenhaMentor: SenhaMentor,
-          isAdmin: false,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ EmailMentor, SenhaMentor, isAdmin: false }),
       });
-
       if (!res.ok) {
         const err = await res
           .json()
@@ -89,7 +77,6 @@ export default function TabsLogin() {
         alert("Erro: " + (err.error || `Status ${res.status}`));
         return;
       }
-
       const { mentor } = await res.json();
       setIdMentor(mentor.IdMentor);
       router.push(`/mentor/${mentor.IdMentor}/mentor-history`);
@@ -102,27 +89,19 @@ export default function TabsLogin() {
   const handleSubmitAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL não está configurada");
-      alert("Erro de configuração. Entre em contato com o suporte.");
-      return;
-    }
-
-    const apiUrl = `${backendUrl}/api/loginAdmin`;
-
     try {
-      const res = await fetch(apiUrl, {
+      if (isMockMode()) {
+        const admin = ensureMockAdminForUser(EmailMentor);
+        setIdMentor(admin.IdMentor);
+        router.push(`/admin/${admin.IdMentor}/admin-history`);
+        return;
+      }
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const res = await fetch(`${backendUrl}/api/loginAdmin`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          EmailMentor: EmailMentor,
-          SenhaMentor: SenhaMentor,
-          isAdmin: true,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ EmailMentor, SenhaMentor, isAdmin: true }),
       });
-
       if (!res.ok) {
         const err = await res
           .json()
@@ -131,7 +110,6 @@ export default function TabsLogin() {
         alert("Erro: " + (err.error || `Status ${res.status}`));
         return;
       }
-
       const { admin } = await res.json();
       setIdMentor(admin.IdMentor);
       router.push(`/admin/${admin.IdMentor}/admin-history`);

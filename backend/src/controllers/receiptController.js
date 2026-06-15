@@ -3,7 +3,7 @@ import { prisma } from "../../prisma/lib/prisma.js";
 import { deleteImageFromUrl } from "../configs/cloudinaryHelper.js";
 
 const receiptController = {
-  // POST /api/comprovante/:IdContribuicaoFinanciera (adiciona imagem pela contribuição financeira)
+  // POST /api/comprovante/:IdContribuicaoFinanciera
   addReceiptAtContribution: async (req, res) => {
     try {
       const { IdContribuicaoFinanceira } = req.params;
@@ -152,6 +152,7 @@ const receiptController = {
       });
     }
   },
+
   // GET /api/comprovante/usuario/:raUsuario
   receiptByRA: async (req, res) => {
     try {
@@ -223,7 +224,7 @@ const receiptController = {
     }
   },
 
-  getAllReceipts: async (req, res) => {
+  getAllReceipts: async (_, res) => {
     try {
       const comprovantes = await prisma.comprovante.findMany({
         include: {
@@ -248,7 +249,7 @@ const receiptController = {
     }
   },
 
-  // DELETE /api/comprovante/:IdComprovante (deleta comprovante e tira da tabela de contribuição financeira)
+  // DELETE /api/comprovante/:IdComprovante
   deleteReceiptById: async (req, res) => {
     try {
       const { IdComprovante } = req.params;

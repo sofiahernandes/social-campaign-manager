@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import TabsLogin from "@/components/tabs-login";
-import BackHome from "@/components/back-home";
+import BackHome from "@/components/buttons/back";
 
 export default function Login() {
   return (

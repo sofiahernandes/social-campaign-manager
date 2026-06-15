@@ -3,7 +3,6 @@ const prisma = new PrismaClient();
 
 async function tryConnection() {
   try {
-    
     const Admin = await prisma.mentor.create({
       data: {
         EmailMentor: "",

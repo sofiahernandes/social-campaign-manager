@@ -21,9 +21,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import * as React from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Contribution } from "@/components/contribution-table/columns";
+import type { Contribution } from "@/components/administrator/contributions-table/columns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,7 +38,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -60,15 +60,17 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Procurar fonte da doação..."
-          value={(table.getColumn("Fonte")?.getFilterValue() as string) ?? ""}
+          placeholder="Procurar nome de um grupo..."
+          value={
+            (table.getColumn("NomeTime")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("Fonte")?.setFilterValue(event.target.value)
+            table.getColumn("NomeTime")?.setFilterValue(event.target.value)
           }
           className="max-w-sm border border-gray-300"
         />
       </div>
-      <div className="overflow-hidden rounded-md border border-gray-200 shadow-xl">
+      <div className="overflow-hidden rounded-md border border-gray-200 shadow-md">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -79,7 +81,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -100,7 +102,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

@@ -19,12 +19,19 @@ interface User {
   TurmaUsuario: string;
 }
 
-const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
+import { getMockTeamByUser, getMockUser, isMockMode } from "@/lib/mock-db";
 
 export async function fetchData(
-  RaUsuario: number
+  RaUsuario: number,
 ): Promise<{ team: Team; user: User } | undefined> {
   try {
+    if (isMockMode()) {
+      const team = getMockTeamByUser(RaUsuario);
+      const user = getMockUser(RaUsuario);
+      if (!team || !user) return;
+      return { team, user };
+    }
+    const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     const res = await fetch(`${backend_url}/api/${RaUsuario}/userTeam`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },

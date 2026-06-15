@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Contribution } from "./contribution-table-admin/columns";
+import { Contribution } from "./contributions-table/columns";
 import {
   Table,
   TableBody,
@@ -12,21 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// interface Contribution {
-//   IdContribuicao: number;
-//   RaUsuario: number;
-//   TipoDoacao: string;
-//   Quantidade: number;
-//   Meta?: number;
-//   Gastos?: number;
-//   Fonte?: string;
-//   comprovante?: {
-//     IdComprovante: number;
-//     Imagem: string;
-//   };
-//   DataContribuicao: string;
-// }
 
 export default function RenderContribution() {
   const [contributions, setContributions] = useState<Contribution[]>([]);

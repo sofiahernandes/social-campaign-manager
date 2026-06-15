@@ -10,10 +10,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import formatBRL from "./formatBRL";
+import formatBRL from "../hooks/use-format-currency";
 import { v4 as uuidv4 } from "uuid";
-import { Contribution } from "./contribution-table/columns";
+import { Contribution } from "./contributions-table/columns";
 import Loading from "./loading";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
 interface RenderContributionProps {
   raUsuario?: number;
@@ -44,8 +45,8 @@ export default function RenderContributionCard({
     typeof raUsuario === "number" && Number.isFinite(raUsuario)
       ? raUsuario
       : typeof raFromParams === "number" && Number.isFinite(raFromParams)
-      ? raFromParams
-      : undefined;
+        ? raFromParams
+        : undefined;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,13 +59,18 @@ export default function RenderContributionCard({
       try {
         setLoading(true);
         setError(null);
+        if (isMockMode()) {
+          const raw = getMockContributions(RaUsuario);
+          setContributions(raw as ContributionAdmin[]);
+          return;
+        }
 
         const res = await fetch(
           `${backend_url}/api/contributions/${RaUsuario}`,
           {
             cache: "no-store",
             signal: controller.signal,
-          }
+          },
         );
 
         if (!res.ok) throw new Error("Erro ao buscar contribuições");
@@ -74,13 +80,15 @@ export default function RenderContributionCard({
         const data: ContributionAdmin[] = Array.isArray(raw)
           ? raw.map((r: any) => {
               const quantidade = Number(
-                String(r.Quantidade).replace(/\./g, "").replace(",", ".")
+                String(r.Quantidade).replace(/\./g, "").replace(",", "."),
               );
 
               const pesoUnidade =
                 r.PesoUnidade != null
                   ? Number(
-                      String(r.PesoUnidade).replace(/\./g, "").replace(",", ".")
+                      String(r.PesoUnidade)
+                        .replace(/\./g, "")
+                        .replace(",", "."),
                     )
                   : 0;
 
@@ -99,7 +107,7 @@ export default function RenderContributionCard({
               const IdContribuicao = Number(
                 r.IdContribuicao ??
                   r.IdContribuicaoFinanceira ??
-                  r.IdContribuicaoAlimenticia
+                  r.IdContribuicaoAlimenticia,
               );
 
               const idComp =
@@ -140,13 +148,13 @@ export default function RenderContributionCard({
                 Meta:
                   r.Meta != null
                     ? Number(
-                        String(r.Meta).replace(/\./g, "").replace(",", ".")
+                        String(r.Meta).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Gastos:
                   r.Gastos != null
                     ? Number(
-                        String(r.Gastos).replace(/\./g, "").replace(",", ".")
+                        String(r.Gastos).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Fonte: r.Fonte ?? "",
@@ -190,7 +198,7 @@ export default function RenderContributionCard({
 
   if (contributions.length === 0) {
     return (
-      <div className="col-start-2 border rounded-xl border-gray-200 shadow-xl w-auto max-w-100 mx-auto">
+      <div className="col-start-2 border rounded-xl border-gray-200 shadow-md w-auto max-w-100 mx-auto">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -208,7 +216,7 @@ export default function RenderContributionCard({
   }
 
   return (
-    <div className="mx-4 mb-15 grid grid-cols-1 md:grid-cols-3 gap-4.5 rounded-sm p-2.5">
+    <div className="mb-15 grid grid-cols-1 md:grid-cols-3 gap-4">
       {loading && (
         <div className="w-screen h-full text-center text-gray-600">
           <Loading />
@@ -217,10 +225,10 @@ export default function RenderContributionCard({
 
       {!loading &&
         !error &&
-        contributions.map((c) => (
+        contributions.map((c, index) => (
           <div
-            key={c.uuid}
-            className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
+            key={`contribuicao-${c.uuid}-${index}`}
+            className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary bg-white border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
             onClick={() => onSelect?.(c)}
           >
             <p className="font-semibold text-lg ">{c.Fonte}</p>

@@ -1,22 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { HandHeart } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
+import { HandHeart as HandHeart } from "lucide-react";
+import { DataTable } from "@/components/contributions-table/data-table";
+import {
+  makeContributionColumns,
+  type Contribution,
+} from "@/components/contributions-table/columns";
+
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { v4 as uuidv4 } from "uuid";
-import { Contribution } from "./contribution-table-admin/columns";
-import Loading from "./loading";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
 interface RenderContributionProps {
+  raUsuario?: number;
   onSelect?: (contribution: Contribution) => void;
   refreshKey?: number;
-  isPublicReport?: boolean;
 }
 
 type ContributionAdmin = Contribution & {
@@ -24,32 +31,53 @@ type ContributionAdmin = Contribution & {
   PontuacaoTotal?: number;
   alimentos?: {
     NomeAlimento: string;
-    Pontuacao?: number | string;
+    Pontuacao?: number;
   }[];
 };
 
-export default function RenderContributionCardAdmin({
+export default function RenderContributionTable({
+  raUsuario,
   onSelect,
   refreshKey = 0,
-  isPublicReport = false,
 }: RenderContributionProps) {
   const [contributions, setContributions] = useState<ContributionAdmin[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const params = useParams();
+  const raFromParams = params?.RaUsuario ? Number(params.RaUsuario) : undefined;
+
+  const RaUsuario =
+    typeof raUsuario === "number" && Number.isFinite(raUsuario)
+      ? raUsuario
+      : typeof raFromParams === "number" && Number.isFinite(raFromParams)
+        ? raFromParams
+        : undefined;
+
+  const columns = useMemo(
+    () =>
+      makeContributionColumns({
+        onView: (c) => onSelect?.(c),
+      }),
+    [onSelect],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
-    const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     let active = true;
-
+    const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     async function fetchContributions() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`${backend_url}/api/contributions`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        if (isMockMode()) {
+          const raw = getMockContributions(RaUsuario);
+          setContributions(raw as ContributionAdmin[]);
+          return;
+        }
+        const res = await fetch(
+          `${backend_url}/api/contributions/${RaUsuario}`,
+          { cache: "no-store", signal: controller.signal },
+        );
 
         if (!res.ok) throw new Error("Erro ao buscar contribuições");
         const raw = await res.json();
@@ -58,13 +86,15 @@ export default function RenderContributionCardAdmin({
         const data: ContributionAdmin[] = Array.isArray(raw)
           ? raw.map((r: any) => {
               const quantidade = Number(
-                String(r.Quantidade).replace(/\./g, "").replace(",", ".")
+                String(r.Quantidade).replace(/\./g, "").replace(",", "."),
               );
 
               const pesoUnidade =
                 r.PesoUnidade != null
                   ? Number(
-                      String(r.PesoUnidade).replace(/\./g, "").replace(",", ".")
+                      String(r.PesoUnidade)
+                        .replace(/\./g, "")
+                        .replace(",", "."),
                     )
                   : 0;
 
@@ -83,7 +113,7 @@ export default function RenderContributionCardAdmin({
               const IdContribuicao = Number(
                 r.IdContribuicao ??
                   r.IdContribuicaoFinanceira ??
-                  r.IdContribuicaoAlimenticia
+                  r.IdContribuicaoAlimenticia,
               );
 
               const idComp =
@@ -117,6 +147,7 @@ export default function RenderContributionCardAdmin({
                   Imagem: finalUrl,
                 };
               }
+
               return {
                 RaUsuario: Number(r.RaUsuario),
                 TipoDoacao: String(r.TipoDoacao ?? ""),
@@ -124,13 +155,13 @@ export default function RenderContributionCardAdmin({
                 Meta:
                   r.Meta != null
                     ? Number(
-                        String(r.Meta).replace(/\./g, "").replace(",", ".")
+                        String(r.Meta).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Gastos:
                   r.Gastos != null
                     ? Number(
-                        String(r.Gastos).replace(/\./g, "").replace(",", ".")
+                        String(r.Gastos).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Fonte: r.Fonte ?? "",
@@ -150,9 +181,10 @@ export default function RenderContributionCardAdmin({
                       Pontuacao: Number(a.Pontuacao ?? 0),
                     }))
                   : [],
-              };
+              } satisfies ContributionAdmin;
             })
           : [];
+
         setContributions(data);
       } catch (err: any) {
         if (err?.name === "AbortError") {
@@ -163,18 +195,26 @@ export default function RenderContributionCardAdmin({
         if (active) setLoading(false);
       }
     }
-
     fetchContributions();
-
     return () => {
       active = false;
       controller.abort();
     };
-  }, [refreshKey]);
+  }, [RaUsuario, refreshKey]);
 
-  if (contributions.length === 0) {
+  if (loading) {
     return (
-      <div className="col-start-2 border rounded-xl border-gray-200 shadow-xl w-auto max-w-100 mx-auto">
+      <div className="p-4">
+        <div className="animate-pulse text-sm text-muted-foreground">
+          Carregando contribuições…
+        </div>
+      </div>
+    );
+  }
+
+  if (!contributions.length) {
+    return (
+      <div className="col-start-2 border rounded-xl border-gray-200 shadow-md w-auto max-w-100 mx-auto">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -182,78 +222,22 @@ export default function RenderContributionCardAdmin({
             </EmptyMedia>
             <EmptyTitle>Nenhuma contribuição por enquanto!</EmptyTitle>
             <EmptyDescription>
-              Nessa edição, nenhum grupo arrecadou doações. Quando os alunos
-              líderes adicionarem ao Arkana, aparecerá aqui!
+              Seu grupo ainda não arrecadou nenhuma doação. Quando o aluno líder
+              adicionar ao Arkana, ela aparecerá aqui!
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent />
         </Empty>
       </div>
     );
   }
 
   return (
-    <>
-      {loading && (
-        <div className="w-screen h-full text-center text-gray-600">
-          <Loading />
-        </div>
-      )}
-
-      {!loading && isPublicReport ? (
-        <div className="md:mx-4 mb-15 grid grid-cols-1 md:grid-cols-3 gap-4.5 rounded-sm md:p-2.5">
-          {contributions.map((c) => (
-            <div
-              key={c.uuid}
-              className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
-              onClick={() => onSelect?.(c)}
-            >
-              <p className="font-semibold text-lg ">{c.NomeTime}</p>
-              <p className="text-base text-gray-950">
-                Data: {new Date(c.DataContribuicao).toLocaleDateString("pt-BR")}
-              </p>
-              <p className="text-base text-gray-950">
-                Fonte da doação: {c.Fonte}
-              </p>
-              <p className="text-base text-gray-950">
-                Ra do Aluno: {c.RaUsuario}
-              </p>
-              <p className="text-base text-gray-800">
-                Tipo de Doação: {c.TipoDoacao}
-              </p>
-              <p className="text-base text-gray-800">
-                Quantidade: {Intl.NumberFormat("pt-BR").format(c.Quantidade)}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="mx-4 mb-15 grid grid-cols-1 md:grid-cols-3 gap-4.5 rounded-sm p-2.5">
-          {contributions.map((c) => (
-            <div
-              key={c.uuid}
-              className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
-              onClick={() => onSelect?.(c)}
-            >
-              <p className="font-semibold text-lg ">{c.NomeTime}</p>
-              <p className="text-base text-gray-950">
-                Data: {new Date(c.DataContribuicao).toLocaleDateString("pt-BR")}
-              </p>
-              <p className="text-base text-gray-950">
-                Fonte da doação: {c.Fonte}
-              </p>
-              <p className="text-base text-gray-950">
-                Ra do Aluno: {c.RaUsuario}
-              </p>
-              <p className="text-base text-gray-800">
-                Tipo de Doação: {c.TipoDoacao}
-              </p>
-              <p className="text-base text-gray-800">
-                Quantidade: {Intl.NumberFormat("pt-BR").format(c.Quantidade)}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+    <div>
+      <DataTable<ContributionAdmin, unknown>
+        columns={columns}
+        data={contributions}
+      />
+    </div>
   );
 }

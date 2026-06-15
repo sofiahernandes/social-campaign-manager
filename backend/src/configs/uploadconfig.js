@@ -64,7 +64,7 @@ const fileFilter = (req, file, cb) => {
   if (!allowed.has(file.mimetype)) {
     return cb(
       new Error("Apenas arquivos PNG, JPG, JPEG, WEBP e PDF são permitidos"),
-      false
+      false,
     );
   }
   cb(null, true);

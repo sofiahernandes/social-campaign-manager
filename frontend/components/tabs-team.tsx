@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import BackHome from "@/components/back-home";
+import React from "react";
+import BackHome from "@/components/buttons/back";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -45,7 +45,6 @@ export default function TeamTabs({ raUsuario }: Props) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // Dados da tabela Time
           NomeTime: NomeTime,
           RaUsuario: Number(raUsuario),
           RaAluno2: Number(RaAluno2) || 0,
@@ -77,7 +76,7 @@ export default function TeamTabs({ raUsuario }: Props) {
 
       if (error instanceof TypeError && error.message === "Failed to fetch") {
         alert(
-          "Erro de conexão. Verifique se o backend está rodando e se a URL está correta."
+          "Erro de conexão. Verifique se o backend está rodando e se a URL está correta.",
         );
       } else {
         alert("Erro ao cadastrar time: " + error);

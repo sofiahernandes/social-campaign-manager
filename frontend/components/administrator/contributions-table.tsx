@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { HandHeart as HandHeart } from "lucide-react";
-import { DataTable } from "@/components/contribution-table/data-table";
+import { DataTable } from "@/components/administrator/contributions-table/data-table";
 import {
   makeContributionColumns,
   type Contribution,
-} from "@/components/contribution-table/columns";
+} from "@/components/administrator/contributions-table/columns";
 
 import {
   Empty,
@@ -18,9 +17,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
 interface RenderContributionProps {
-  raUsuario?: number;
   onSelect?: (contribution: Contribution) => void;
   refreshKey?: number;
 }
@@ -30,48 +29,43 @@ type ContributionAdmin = Contribution & {
   PontuacaoTotal?: number;
   alimentos?: {
     NomeAlimento: string;
-    Pontuacao?: number
+    Pontuacao?: number | string;
   }[];
 };
 
-export default function RenderContributionTable({
-  raUsuario,
+export default function RenderContributionTableAdmin({
   onSelect,
   refreshKey = 0,
 }: RenderContributionProps) {
   const [contributions, setContributions] = useState<ContributionAdmin[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const params = useParams();
-  const raFromParams = params?.RaUsuario ? Number(params.RaUsuario) : undefined;
-
-  const RaUsuario =
-    typeof raUsuario === "number" && Number.isFinite(raUsuario)
-      ? raUsuario
-      : typeof raFromParams === "number" && Number.isFinite(raFromParams)
-      ? raFromParams
-      : undefined;
+  const [_, setError] = useState<string | null>(null);
 
   const columns = useMemo(
     () =>
       makeContributionColumns({
         onView: (c) => onSelect?.(c),
       }),
-    [onSelect]
+    [onSelect],
   );
 
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
+
     async function fetchContributions() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(
-          `${backend_url}/api/contributions/${RaUsuario}`,
-          { cache: "no-store", signal: controller.signal }
-        );
+        if (isMockMode()) {
+          setContributions(getMockContributions() as ContributionAdmin[]);
+          return;
+        }
+        const res = await fetch(`${backend_url}/api/contributions`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
 
         if (!res.ok) throw new Error("Erro ao buscar contribuições");
         const raw = await res.json();
@@ -80,16 +74,17 @@ export default function RenderContributionTable({
         const data: ContributionAdmin[] = Array.isArray(raw)
           ? raw.map((r: any) => {
               const quantidade = Number(
-                String(r.Quantidade).replace(/\./g, "").replace(",", ".")
+                String(r.Quantidade).replace(/\./g, "").replace(",", "."),
               );
 
               const pesoUnidade =
                 r.PesoUnidade != null
                   ? Number(
-                      String(r.PesoUnidade).replace(/\./g, "").replace(",", ".")
+                      String(r.PesoUnidade)
+                        .replace(/\./g, "")
+                        .replace(",", "."),
                     )
                   : 0;
-
               const pesoTotal =
                 Number.isFinite(quantidade) && Number.isFinite(pesoUnidade)
                   ? quantidade * pesoUnidade
@@ -105,7 +100,7 @@ export default function RenderContributionTable({
               const IdContribuicao = Number(
                 r.IdContribuicao ??
                   r.IdContribuicaoFinanceira ??
-                  r.IdContribuicaoAlimenticia
+                  r.IdContribuicaoAlimenticia,
               );
 
               const idComp =
@@ -147,13 +142,13 @@ export default function RenderContributionTable({
                 Meta:
                   r.Meta != null
                     ? Number(
-                        String(r.Meta).replace(/\./g, "").replace(",", ".")
+                        String(r.Meta).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Gastos:
                   r.Gastos != null
                     ? Number(
-                        String(r.Gastos).replace(/\./g, "").replace(",", ".")
+                        String(r.Gastos).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Fonte: r.Fonte ?? "",
@@ -176,7 +171,6 @@ export default function RenderContributionTable({
               } satisfies ContributionAdmin;
             })
           : [];
-
         setContributions(data);
       } catch (err: any) {
         if (err?.name === "AbortError") {
@@ -192,7 +186,7 @@ export default function RenderContributionTable({
       active = false;
       controller.abort();
     };
-  }, [RaUsuario, refreshKey]);
+  }, [refreshKey]);
 
   if (loading) {
     return (
@@ -206,7 +200,7 @@ export default function RenderContributionTable({
 
   if (!contributions.length) {
     return (
-      <div className="col-start-2 border rounded-xl border-gray-200 shadow-xl w-auto max-w-100 mx-auto">
+      <div className="col-start-2 border rounded-xl border-gray-200 shadow-md w-auto max-w-100 mx-auto">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -214,8 +208,8 @@ export default function RenderContributionTable({
             </EmptyMedia>
             <EmptyTitle>Nenhuma contribuição por enquanto!</EmptyTitle>
             <EmptyDescription>
-              Seu grupo ainda não arrecadou nenhuma doação. Quando o aluno líder
-              adicionar ao Arkana, ela aparecerá aqui!
+              Nessa edição, nenhum grupo arrecadou doações. Quando os alunos
+              líderes adicionarem ao Arkana, aparecerá aqui!
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent />
@@ -225,7 +219,7 @@ export default function RenderContributionTable({
   }
 
   return (
-    <div className="p-2.5">
+    <div className="p-2">
       <DataTable<ContributionAdmin, unknown>
         columns={columns}
         data={contributions}
@@ -233,4 +227,3 @@ export default function RenderContributionTable({
     </div>
   );
 }
-``;

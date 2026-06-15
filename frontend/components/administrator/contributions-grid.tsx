@@ -1,27 +1,23 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { v4 as uuidv4 } from "uuid";
-import { HandHeart as HandHeart } from "lucide-react";
-import { DataTable } from "@/components/contribution-table-admin/data-table";
-import {
-  makeContributionColumns,
-  type Contribution,
-} from "@/components/contribution-table-admin/columns";
-
+import React, { useEffect, useState } from "react";
+import { HandHeart } from "lucide-react";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { v4 as uuidv4 } from "uuid";
+import { Contribution } from "./contributions-table/columns";
+import { getMockContributions, isMockMode } from "@/lib/mock-db";
+import Loading from "../loading";
 
 interface RenderContributionProps {
   onSelect?: (contribution: Contribution) => void;
   refreshKey?: number;
+  isPublicReport?: boolean;
 }
 
 type ContributionAdmin = Contribution & {
@@ -33,31 +29,28 @@ type ContributionAdmin = Contribution & {
   }[];
 };
 
-export default function RenderContributionTableAdmin({
+export default function RenderContributionCardAdmin({
   onSelect,
   refreshKey = 0,
+  isPublicReport = false,
 }: RenderContributionProps) {
   const [contributions, setContributions] = useState<ContributionAdmin[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const columns = useMemo(
-    () =>
-      makeContributionColumns({
-        onView: (c) => onSelect?.(c),
-      }),
-    [onSelect]
-  );
-
   useEffect(() => {
     const controller = new AbortController();
-    let active = true;
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
+    let active = true;
 
     async function fetchContributions() {
       try {
         setLoading(true);
         setError(null);
+        if (isMockMode()) {
+          setContributions(getMockContributions() as Contribution[]);
+          return;
+        }
         const res = await fetch(`${backend_url}/api/contributions`, {
           cache: "no-store",
           signal: controller.signal,
@@ -70,15 +63,18 @@ export default function RenderContributionTableAdmin({
         const data: ContributionAdmin[] = Array.isArray(raw)
           ? raw.map((r: any) => {
               const quantidade = Number(
-                String(r.Quantidade).replace(/\./g, "").replace(",", ".")
+                String(r.Quantidade).replace(/\./g, "").replace(",", "."),
               );
 
               const pesoUnidade =
                 r.PesoUnidade != null
                   ? Number(
-                      String(r.PesoUnidade).replace(/\./g, "").replace(",", ".")
+                      String(r.PesoUnidade)
+                        .replace(/\./g, "")
+                        .replace(",", "."),
                     )
                   : 0;
+
               const pesoTotal =
                 Number.isFinite(quantidade) && Number.isFinite(pesoUnidade)
                   ? quantidade * pesoUnidade
@@ -94,7 +90,7 @@ export default function RenderContributionTableAdmin({
               const IdContribuicao = Number(
                 r.IdContribuicao ??
                   r.IdContribuicaoFinanceira ??
-                  r.IdContribuicaoAlimenticia
+                  r.IdContribuicaoAlimenticia,
               );
 
               const idComp =
@@ -128,7 +124,6 @@ export default function RenderContributionTableAdmin({
                   Imagem: finalUrl,
                 };
               }
-
               return {
                 RaUsuario: Number(r.RaUsuario),
                 TipoDoacao: String(r.TipoDoacao ?? ""),
@@ -136,13 +131,13 @@ export default function RenderContributionTableAdmin({
                 Meta:
                   r.Meta != null
                     ? Number(
-                        String(r.Meta).replace(/\./g, "").replace(",", ".")
+                        String(r.Meta).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Gastos:
                   r.Gastos != null
                     ? Number(
-                        String(r.Gastos).replace(/\./g, "").replace(",", ".")
+                        String(r.Gastos).replace(/\./g, "").replace(",", "."),
                       )
                     : undefined,
                 Fonte: r.Fonte ?? "",
@@ -162,7 +157,7 @@ export default function RenderContributionTableAdmin({
                       Pontuacao: Number(a.Pontuacao ?? 0),
                     }))
                   : [],
-              } satisfies ContributionAdmin;
+              };
             })
           : [];
         setContributions(data);
@@ -175,26 +170,18 @@ export default function RenderContributionTableAdmin({
         if (active) setLoading(false);
       }
     }
+
     fetchContributions();
+
     return () => {
       active = false;
       controller.abort();
     };
   }, [refreshKey]);
 
-  if (loading) {
+  if (contributions.length === 0) {
     return (
-      <div className="p-4">
-        <div className="animate-pulse text-sm text-muted-foreground">
-          Carregando contribuições…
-        </div>
-      </div>
-    );
-  }
-
-  if (!contributions.length) {
-    return (
-      <div className="col-start-2 border rounded-xl border-gray-200 shadow-xl w-auto max-w-100 mx-auto">
+      <div className="col-start-2 border rounded-xl border-gray-200 shadow-md w-auto max-w-100 mx-auto">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -206,19 +193,74 @@ export default function RenderContributionTableAdmin({
               líderes adicionarem ao Arkana, aparecerá aqui!
             </EmptyDescription>
           </EmptyHeader>
-          <EmptyContent />
         </Empty>
       </div>
     );
   }
 
   return (
-    <div className="p-2.5">
-      <DataTable<ContributionAdmin, unknown>
-        columns={columns}
-        data={contributions}
-      />
-    </div>
+    <>
+      {loading && (
+        <div className="w-screen h-full text-center text-gray-600">
+          <Loading />
+        </div>
+      )}
+
+      {!loading && isPublicReport ? (
+        <div className="md:mx-4 mb-15 grid grid-cols-1 md:grid-cols-3 gap-4.5 rounded-sm">
+          {contributions.map((c) => (
+            <div
+              key={c.uuid}
+              className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary bg-white border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
+              onClick={() => onSelect?.(c)}
+            >
+              <p className="font-semibold text-lg ">{c.NomeTime}</p>
+              <p className="text-base text-gray-950">
+                Data: {new Date(c.DataContribuicao).toLocaleDateString("pt-BR")}
+              </p>
+              <p className="text-base text-gray-950">
+                Fonte da doação: {c.Fonte}
+              </p>
+              <p className="text-base text-gray-950">
+                Ra do Aluno: {c.RaUsuario}
+              </p>
+              <p className="text-base text-gray-800">
+                Tipo de Doação: {c.TipoDoacao}
+              </p>
+              <p className="text-base text-gray-800">
+                Quantidade: {Intl.NumberFormat("pt-BR").format(c.Quantidade)}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="mb-15 grid grid-cols-1 md:grid-cols-3 gap-4 rounded-sm">
+          {contributions.map((c) => (
+            <div
+              key={c.uuid}
+              className="p-3 rounded-xl hover:bg-secondary/5 hover:text-secondary bg-white border border-gray-200 shadow-md transition-shadow duration-300 cursor-pointer"
+              onClick={() => onSelect?.(c)}
+            >
+              <p className="font-semibold text-lg ">{c.NomeTime}</p>
+              <p className="text-base text-gray-950">
+                Data: {new Date(c.DataContribuicao).toLocaleDateString("pt-BR")}
+              </p>
+              <p className="text-base text-gray-950">
+                Fonte da doação: {c.Fonte}
+              </p>
+              <p className="text-base text-gray-950">
+                Ra do Aluno: {c.RaUsuario}
+              </p>
+              <p className="text-base text-gray-800">
+                Tipo de Doação: {c.TipoDoacao}
+              </p>
+              <p className="text-base text-gray-800">
+                Quantidade: {Intl.NumberFormat("pt-BR").format(c.Quantidade)}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
-``;

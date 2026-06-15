@@ -1,7 +1,7 @@
 import { prisma } from "../../prisma/lib/prisma.js";
 
 const teamsController = {
-  //GET /api/teams
+  // GET /api/teams
   allTeams: async (_, res) => {
     try {
       const times = await prisma.time.findMany({
@@ -17,7 +17,7 @@ const teamsController = {
     }
   },
 
-  //GET /api/team/:IdTime
+  // GET /api/team/:IdTime
   teamByID: async (req, res) => {
     const { IdTime } = req.params;
     try {
@@ -32,7 +32,8 @@ const teamsController = {
       res.status(500).json({ error: "Time não encontrado" });
     }
   },
-  //GET /api/team/:RaUsuario
+
+  // GET /api/team/:RaUsuario
   teamByUserRA: async (req, res) => {
     const { RaUsuario } = req.params;
 
@@ -75,7 +76,7 @@ const teamsController = {
     }
   },
 
-  //POST /api/createTeam
+  // POST /api/createTeam
   createTeam: async (req, res) => {
     const {
       IdMentor,
@@ -137,7 +138,7 @@ const teamsController = {
     }
   },
 
-  //DELETE /api/deleteTeam/:IdTime
+  // DELETE /api/deleteTeam/:IdTime
   deleteTeam: async (req, res) => {
     const { IdTime } = req.params;
     try {
