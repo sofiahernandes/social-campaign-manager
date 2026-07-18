@@ -1,8 +1,8 @@
 ## Arkana | Social Campaign Managment System
-Access the application: [https://arkana-projeto1.vercel.app](https://arkana-projeto1.vercel.app)
+Access the application: [https://arkana-portfolio.vercel.app](https://arkana-portfolio.vercel.app/)
 </div>
 
-Group: [Analice Coimbra Carneiro](https://github.com/AnaliceCoimbra/), [Mariah Alice Pimentel Lôbo Pereira](https://github.com/alicelobwp), [Sofia Botechia Hernandes](https://github.com/sofiahernandes), [Victória Duarte Vieira Azevedo](https://github.com/viick04)  
+Group: [Analice Carneiro](https://github.com/AnaliceCoimbra/), [Mariah Alice Pereira](https://github.com/alicelobwp), [Sofia Hernandes](https://github.com/sofiahernandes), [Victória Azevedo](https://github.com/viick04)  
 Advisors: [Cristina Leite](https://www.linkedin.com/), [David Lemes](https://www.linkedin.com/in/dolemes/), [Francisco Escobar](https://www.linkedin.com/), [Leonardo Lugoboni](https://www.linkedin.com/), [Katia Bossi](https://www.linkedin.com/)
 <br/><br/>
 
@@ -10,7 +10,7 @@ Advisors: [Cristina Leite](https://www.linkedin.com/), [David Lemes](https://www
 
 Arkana is a TypeScript-first full-stack web application developed for the **Lideranças Empáticas Project**, an initiative by **FECAP University Center** that combines social impact with entrepreneurial education through food and fundraising campaigns.
 The platform streamlines the management of every donation campaign edition by providing tools for team administration, activity tracking, goal monitoring, contribution management, receipt validation, and performance analytics.
-Designed prioritizing scalability and maintainability, the application leverages **Next.js 15**, **Express**, **Prisma**, **MySQL**, **JWT authentication**, **Cloudinary**, and a RESTful architecture, with deployment configured for **Vercel** and **Railway**.
+Designed prioritizing scalability and maintainability, the application leverages **Next.js**, **Express**, **Prisma**, **MySQL**, **JWT authentication**, **Cloudinary**, and a RESTful architecture, with deployment configured for **Vercel** and **Railway**.
 
 ### Tech Stack
 - Language(s): TypeScript (primary), JavaScript (secondary)
