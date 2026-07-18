@@ -12,32 +12,39 @@ Arkana is a TypeScript-first full-stack web application developed for the **Lide
 The platform streamlines the management of every donation campaign edition by providing tools for team administration, activity tracking, goal monitoring, contribution management, receipt validation, and performance analytics.
 Designed prioritizing scalability and maintainability, the application leverages **Next.js**, **Express**, **Prisma**, **MySQL**, **JWT authentication**, **Cloudinary**, and a RESTful architecture, with deployment configured for **Vercel** and **Railway**.
 
-### Tech Stack
-- Language(s): TypeScript (primary), JavaScript (secondary)
-- Framework/runtime: Next.js 15 (frontend, likely App Router) + Node.js + Express (backend) + Prisma ORM with MySQL
-- Notable libraries: Next.js, React, Radix UI + Recharts (frontend); Express, Prisma, mysql2, multer/cloudinary (backend)
-
 ### Folders structure
 
 ```yaml
-backend/              # Express + Prisma backend (TypeScript/JavaScript sources, routes, controllers, uploads)
+backend/              # Express + Prisma backend application
   ├─ package.json
   ├─ .env.example
-  ├─ prisma/          # Prisma schema & generated artifacts (persistence layer)
+  ├─ prisma/          # Prisma schema, migrations, and generated client
   └─ src/
-     ├─ app.js        # Express app configuration (CORS, static /uploads, error handlers)
-     ├─ server.js     # Server entry
-     ├─ db.js         # DB connection (mysql2 pool)
-     ├─ routes.js     # All HTTP routes (contributions, mentors, teams, users, receipts)
-     ├─ controllers/  # Controller implementations (business endpoints)
-     └─ uploads/      # Uploads handling (multer/cloudinary)
-frontend/             # Next.js TypeScript frontend (app/, components/, hooks/, styles/)
+     ├─ app.js        # Express application setup (CORS, middleware, static files, error handling)
+     ├─ db.js         # MySQL connection pool configuration
+     ├─ db-test.js    # Database connectivity test
+     ├─ routes.js     # API route definitions
+     ├─ server.js     # Application entry point
+     ├─ configs/      # Shared application configuration
+     ├─ controllers/  # Request handlers and business logic
+     ├─ middlewares/  # Custom Express middleware
+     ├─ services/     # Shared services and external integrations
+     └─ uploads/      # File upload configuration and utilities (Multer + Cloudinary)
+
+frontend/             # Next.js 15 TypeScript frontend
   ├─ package.json
+  ├─ .env.example
   ├─ next.config.mjs
-  └─ app/             # Next app pages/components (UI, charts, forms)
-entregas/             # Delivery documents & DB SQL (arkana-database.sql referenced)
-README.md
-LICENSE
+  ├─ app/             # App Router pages, layouts, and routes
+  ├─ assets/          # Static assets (images, icons, fonts)
+  ├─ components/      # Reusable UI components
+  ├─ hooks/           # Custom React hooks
+  ├─ libs/            # Shared utilities and mock data for the demo
+  └─ styles/          # Global and component styles
+
+DATABASE.md           # Database schema documentation
+README.md             # Project overview and setup guide
+LICENSE               # MIT License
 tailwind.config.js
 postcss.config.js
 ```
@@ -69,7 +76,8 @@ npm run dev
 # or
 yarn run dev
 ```
+<br/><br/>
 
 ### License
 
-<a href="https://www.fecap.br">FECAP - Fundação de Comércio Álvares Penteado</a> - <a href="https://github.com/sofiahernandes/social-campaign-manager">Arkana</a> © 2025 by <a href="https://github.com/analicecoimbra">Analice Coimbra Carneiro</a>, <a href="https://github.com/alicelobwp">Mariah Alice Pimentel Lôbo Pereira</a>, <a href="https://github.com/sofiahernandes">Sofia Botechia Hernandes</a> and <a href="https://github.com/viick04">Victória Duarte Vieira Azevedo</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" height="20" width="20" style="margin-left: 0.2em;">
+<a href="https://www.fecap.br">FECAP - Fundação de Comércio Álvares Penteado</a> - <a href="https://github.com/sofiahernandes/social-campaign-manager">Arkana (Social Campain Manager)</a> © 2025 by <a href="https://github.com/analicecoimbra">Analice Coimbra Carneiro</a>, <a href="https://github.com/alicelobwp">Mariah Alice Pimentel Lôbo Pereira</a>, <a href="https://github.com/sofiahernandes">Sofia Botechia Hernandes</a> and <a href="https://github.com/viick04">Victória Duarte Vieira Azevedo</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" height="20" width="20" style="margin-left: 0.2em;">
